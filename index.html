@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Convert speech to text, save transcripts, and generate quick summaries.">
+    <title>Speech to Text Studio</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <main class="page">
+        <section class="app-card" aria-labelledby="app-title">
+            <div class="hero">
+                <p class="eyebrow">Voice productivity tool</p>
+                <h1 id="app-title">Speech to Text Studio</h1>
+                <p class="hero-copy">
+                    Record your voice, edit the transcript, save it as a text file, and open a local summary view.
+                </p>
+            </div>
+
+            <div class="app-grid">
+                <section class="panel recorder-panel" aria-labelledby="recorder-title">
+                    <h2 id="recorder-title">Recorder</h2>
+                    <div class="mic-shell">
+                        <button class="mic-button" id="micButton" type="button" aria-label="Start recording">
+                            <img id="mic" src="./microphone.png" alt="Microphone icon">
+                        </button>
+                        <div class="frequency-bars" id="frequencyBars" aria-hidden="true">
+                            <span style="--i: 0;"></span>
+                            <span style="--i: 1;"></span>
+                            <span style="--i: 2;"></span>
+                            <span style="--i: 3;"></span>
+                        </div>
+                    </div>
+
+                    <p class="status-text" id="timerText">Tap to record</p>
+
+                    <label class="field-label" for="language">Recognition language</label>
+                    <select id="language" class="select-input">
+                        <option value="en-US">English</option>
+                        <option value="kn-IN">Kannada</option>
+                        <option value="hi-IN">Hindi</option>
+                    </select>
+
+                    <p class="support-text" id="browserSupport">
+                        Works best in recent versions of Chrome and Edge.
+                    </p>
+                </section>
+
+                <section class="panel transcript-panel" aria-labelledby="transcript-title">
+                    <div class="panel-heading">
+                        <h2 id="transcript-title">Transcript</h2>
+                        <p>Edit the text before saving or summarizing.</p>
+                    </div>
+
+                    <label class="sr-only" for="inputText">Transcript text</label>
+                    <textarea
+                        id="inputText"
+                        class="text-area"
+                        placeholder="Your transcript will appear here."
+                    ></textarea>
+
+                    <p class="feedback-message" id="feedbackMessage" aria-live="polite"></p>
+
+                    <div class="action-row">
+                        <button class="action-button secondary" id="copyButton" type="button">Copy</button>
+                        <button class="action-button accent" id="summarizeButton" type="button">Summary</button>
+                        <button class="action-button danger" id="clearButton" type="button">Clear</button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="footer-actions">
+                <button class="save-button" id="saveButton" type="button">Save Transcript</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="./index.js"></script>
+</body>
+</html>

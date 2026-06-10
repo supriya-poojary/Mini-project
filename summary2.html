@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Local transcript summary view.">
+    <title>Transcript Summary</title>
+    <style>
+        :root {
+            --bg: #f4efe6;
+            --surface: rgba(255, 255, 255, 0.94);
+            --text: #1d2433;
+            --muted: #5f6575;
+            --border: rgba(29, 36, 51, 0.1);
+            --accent: #da5a2a;
+            --success: #17805d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(218, 90, 42, 0.16), transparent 30%),
+                linear-gradient(180deg, #fbf6ef 0%, var(--bg) 100%);
+            padding: clamp(12px, 3vw, 24px);
+        }
+
+        main {
+            width: min(980px, 100%);
+            margin: 0 auto;
+            padding: clamp(16px, 3vw, 28px);
+            border-radius: 28px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 48px rgba(74, 57, 40, 0.12);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3rem);
+        }
+
+        .intro {
+            margin: 12px 0 0;
+            color: var(--muted);
+            line-height: 1.6;
+            max-width: 700px;
+            font-size: clamp(0.98rem, 1.2vw, 1.05rem);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: clamp(14px, 2vw, 20px);
+            margin-top: 24px;
+        }
+
+        .card {
+            background: #fffdfa;
+            border: 1px solid rgba(29, 36, 51, 0.08);
+            border-radius: 22px;
+            padding: clamp(16px, 2vw, 22px);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 1.35rem;
+        }
+
+        .card p,
+        .card li {
+            line-height: 1.7;
+            color: var(--text);
+            word-break: break-word;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #e6f5ec;
+            color: var(--success);
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-top: 12px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .actions a,
+        .actions button {
+            border: none;
+            border-radius: 999px;
+            min-height: 48px;
+            padding: 12px 18px;
+            font: inherit;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .actions a {
+            background: linear-gradient(135deg, var(--accent) 0%, #b94419 100%);
+            color: white;
+        }
+
+        .actions button {
+            background: #eef2f7;
+            color: var(--text);
+        }
+
+        @media (min-width: 801px) and (max-width: 1100px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .actions a,
+            .actions button {
+                flex: 1 1 calc(50% - 12px);
+            }
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 16px;
+            }
+
+            main {
+                padding: 20px;
+                border-radius: 22px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions a,
+            .actions button {
+                flex: 1 1 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            main {
+                padding: 14px;
+                border-radius: 18px;
+            }
+
+            .card {
+                border-radius: 18px;
+                padding: 14px;
+            }
+
+            h1 {
+                font-size: clamp(1.7rem, 9vw, 2.2rem);
+            }
+
+            .intro,
+            .card p,
+            .card li {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Transcript Summary</h1>
+        <p class="intro">
+            This page uses an OpenAI-powered summary from a secure local backend. Your browser sends the transcript to
+            your own server, and the API key stays in the server environment instead of the frontend.
+        </p>
+
+        <div class="grid">
+            <section class="card">
+                <h2>AI Summary</h2>
+                <p id="summaryText" class="muted">Preparing summary...</p>
+                <span class="pill" id="statsPill">Analyzing text</span>
+            </section>
+
+            <section class="card">
+                <h2>Key Points</h2>
+                <ul id="keyPoints">
+                    <li class="muted">Preparing highlights...</li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>Action Items</h2>
+                <ul id="actionItems">
+                    <li class="muted">Checking for action items...</li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>Original Transcript</h2>
+                <p id="originalText" class="muted">Loading transcript...</p>
+            </section>
+        </div>
+
+        <div class="actions">
+            <a href="./index.html">Back to Recorder</a>
+            <button id="clearStorageButton" type="button">Clear Stored Summary Text</button>
+        </div>
+    </main>
+
+    <script>
+        const text = localStorage.getItem("textToSummarize") || "";
+        const summaryText = document.getElementById("summaryText");
+        const keyPoints = document.getElementById("keyPoints");
+        const actionItems = document.getElementById("actionItems");
+        const originalText = document.getElementById("originalText");
+        const statsPill = document.getElementById("statsPill");
+        const clearStorageButton = document.getElementById("clearStorageButton");
+
+        function setListContent(container, items, emptyMessage) {
+            container.innerHTML = "";
+
+            if (!items.length) {
+                const item = document.createElement("li");
+                item.className = "muted";
+                item.textContent = emptyMessage;
+                container.appendChild(item);
+                return;
+            }
+
+            items.forEach((entry) => {
+                const item = document.createElement("li");
+                item.textContent = entry;
+                container.appendChild(item);
+            });
+        }
+
+        function renderEmptyState(message) {
+            summaryText.textContent = message;
+            originalText.textContent = "No transcript available.";
+            statsPill.textContent = "No transcript";
+            setListContent(keyPoints, [], "No key points yet.");
+            setListContent(actionItems, [], "No action items yet.");
+        }
+
+        function renderSummaryResult(transcript, result) {
+            const normalizedText = transcript.replace(/\s+/g, " ").trim();
+            const wordCount = normalizedText.split(/\s+/).filter(Boolean).length;
+            const sentenceCount = (normalizedText.match(/[^.!?]+[.!?]?/g) || []).length;
+            const readingTime = Math.max(1, Math.round(wordCount / 180));
+
+            summaryText.textContent = result.summary;
+            originalText.textContent = normalizedText;
+            statsPill.textContent = `${wordCount} words | ${sentenceCount} sentences | ${readingTime} min read`;
+
+            setListContent(keyPoints, result.key_points || [], "No key points were returned.");
+            setListContent(actionItems, result.action_items || [], "No action items detected.");
+        }
+
+        async function fetchSummary(transcript) {
+            const cached = localStorage.getItem("aiSummaryResult");
+            if (cached) {
+                return JSON.parse(cached);
+            }
+
+            const response = await fetch("/api/summarize", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ transcript })
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || "Unable to generate summary.");
+            }
+
+            localStorage.setItem("aiSummaryResult", JSON.stringify(result));
+            return result;
+        }
+
+        async function renderPage() {
+            if (!text.trim()) {
+                renderEmptyState("No transcript was found. Return to the recorder and add some text first.");
+                return;
+            }
+
+            originalText.textContent = text;
+
+            try {
+                const result = await fetchSummary(text);
+                renderSummaryResult(text, result);
+            } catch (error) {
+                summaryText.textContent = error.message;
+                statsPill.textContent = "Summary unavailable";
+                setListContent(keyPoints, [], "Could not load key points.");
+                setListContent(actionItems, [], "Could not load action items.");
+            }
+        }
+
+        clearStorageButton.addEventListener("click", () => {
+            localStorage.removeItem("textToSummarize");
+            localStorage.removeItem("aiSummaryResult");
+            renderEmptyState("No transcript was found. Return to the recorder and add some text first.");
+        });
+
+        renderPage();
+    </script>
+</body>
+</html>
