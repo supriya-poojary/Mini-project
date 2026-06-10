@@ -17,7 +17,8 @@ let recognition;
 let isListening = false;
 let transcriptText = "";
 let finalTranscript = "";
-let committedText = ""; // text in textarea before current recording session
+let committedText = ""; // text committed before current session
+let shouldRestart = false; // controls auto-restart on mobile
 let timerId;
 let elapsedSeconds = 0;
 
@@ -83,6 +84,7 @@ function startListening() {
         return;
     }
 
+    shouldRestart = true;
     applyLanguage();
 
     try {
@@ -96,6 +98,7 @@ function startListening() {
 }
 
 function stopListening() {
+    shouldRestart = false;
     if (recognition && isListening) {
         recognition.stop();
     }
@@ -187,11 +190,11 @@ if (!SpeechRecognition) {
 } else {
     recognition = new SpeechRecognition();
     recognition.lang = languageSelect.value;
-    recognition.continuous = true;
+    recognition.continuous = false; // manual restart prevents mobile duplication
     recognition.interimResults = true;
 
     recognition.onstart = () => {
-        // Capture what's already in the textarea before this session
+        // Snapshot current textarea as baseline for this session
         committedText = inputText.value.trim();
         finalTranscript = committedText ? committedText + " " : "";
         transcriptText = committedText;
@@ -201,7 +204,7 @@ if (!SpeechRecognition) {
     };
 
     recognition.onresult = (event) => {
-        // Rebuild transcript from scratch each time to prevent mobile duplication
+        // Rebuild from committedText + this session's results to prevent duplication
         let sessionFinal = committedText ? committedText + " " : "";
         let interimTranscript = "";
 
@@ -234,11 +237,21 @@ if (!SpeechRecognition) {
     };
 
     recognition.onend = () => {
-        updateMicState(false);
-        stopTimer();
-        // Lock in what's in textarea as committed text for next session
-        committedText = inputText.value.trim();
-        finalTranscript = committedText ? committedText + " " : "";
+        // Only commit finalized speech (not interim) to prevent carrying over duplicates
+        committedText = finalTranscript.trim();
         transcriptText = committedText;
+        inputText.value = committedText;
+
+        if (shouldRestart) {
+            // Auto-restart for continuous recording (works on both desktop & mobile)
+            try {
+                recognition.start();
+            } catch (e) {
+                // ignore InvalidStateError on rapid stop/start
+            }
+        } else {
+            updateMicState(false);
+            stopTimer();
+        }
     };
 }
