@@ -17,6 +17,7 @@ let recognition;
 let isListening = false;
 let transcriptText = "";
 let finalTranscript = "";
+let committedText = ""; // text in textarea before current recording session
 let timerId;
 let elapsedSeconds = 0;
 
@@ -190,30 +191,32 @@ if (!SpeechRecognition) {
     recognition.interimResults = true;
 
     recognition.onstart = () => {
-        // Sync finalTranscript with current textarea to prevent duplication on restart
-        const currentText = inputText.value.trim();
-        finalTranscript = currentText ? currentText + " " : "";
-        transcriptText = finalTranscript;
+        // Capture what's already in the textarea before this session
+        committedText = inputText.value.trim();
+        finalTranscript = committedText ? committedText + " " : "";
+        transcriptText = committedText;
         updateMicState(true);
         startTimer();
         setFeedback("Listening... speak clearly into your microphone.", "info");
     };
 
     recognition.onresult = (event) => {
+        // Rebuild transcript from scratch each time to prevent mobile duplication
+        let sessionFinal = committedText ? committedText + " " : "";
         let interimTranscript = "";
 
-        for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        for (let index = 0; index < event.results.length; index += 1) {
             const result = event.results[index];
             const segment = result[0].transcript;
-
             if (result.isFinal) {
-                finalTranscript += `${segment} `;
+                sessionFinal += `${segment} `;
             } else {
                 interimTranscript += segment;
             }
         }
 
-        transcriptText = `${finalTranscript}${interimTranscript}`.trim();
+        finalTranscript = sessionFinal;
+        transcriptText = `${sessionFinal}${interimTranscript}`.trim();
         syncTextarea();
     };
 
@@ -233,8 +236,9 @@ if (!SpeechRecognition) {
     recognition.onend = () => {
         updateMicState(false);
         stopTimer();
-        // Sync finalTranscript with textarea on end to keep state clean
-        finalTranscript = inputText.value.trim() ? inputText.value.trim() + " " : "";
-        transcriptText = inputText.value.trim();
+        // Lock in what's in textarea as committed text for next session
+        committedText = inputText.value.trim();
+        finalTranscript = committedText ? committedText + " " : "";
+        transcriptText = committedText;
     };
 }
