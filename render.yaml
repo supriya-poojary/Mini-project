@@ -7,7 +7,5 @@ services:
     startCommand: npm start
     healthCheckPath: /healthz
     envVars:
-      - key: OPENAI_API_KEY
+      - key: GROQ_API_KEY
         sync: false
-      - key: OPENAI_MODEL
-        value: gpt-4o-mini
