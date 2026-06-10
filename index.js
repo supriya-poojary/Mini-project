@@ -190,6 +190,10 @@ if (!SpeechRecognition) {
     recognition.interimResults = true;
 
     recognition.onstart = () => {
+        // Sync finalTranscript with current textarea to prevent duplication on restart
+        const currentText = inputText.value.trim();
+        finalTranscript = currentText ? currentText + " " : "";
+        transcriptText = finalTranscript;
         updateMicState(true);
         startTimer();
         setFeedback("Listening... speak clearly into your microphone.", "info");
@@ -229,5 +233,8 @@ if (!SpeechRecognition) {
     recognition.onend = () => {
         updateMicState(false);
         stopTimer();
+        // Sync finalTranscript with textarea on end to keep state clean
+        finalTranscript = inputText.value.trim() ? inputText.value.trim() + " " : "";
+        transcriptText = inputText.value.trim();
     };
 }
